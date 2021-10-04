@@ -1,0 +1,22 @@
+body {
+  background: rgb(255, 255, 255);
+}
+#texto{
+    padding: 15px;
+    margin: 0;
+    position: absolute;
+    top: 30%;
+    left: 3%;
+    right: 10;
+    height: 55%;
+    width: 50%;
+}
+
+#consola{
+  padding: 15px;
+    position: absolute;
+    top: 30%;
+    right: 3%;
+    height: 55%;
+    width: 40%;
+}

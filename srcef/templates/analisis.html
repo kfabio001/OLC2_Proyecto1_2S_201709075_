@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<body>
+
+
+    <div class="row">
+     <!-- Editor de texto para ejecucion -->
+        <div class="col">
+            <h1 style="color: gray;">Editor</h1>
+            <a href="#"><button class="btn"></button></a>
+        </div>
+     <!-- salida de la ejecucion -->
+        <div class="col" >
+            <h1 style="color: gray;">Consola</h1>
+            <a href="#" id="getTree"><button class="btn"></button></a>
+        </div>
+        <!-- estilo para css -->
+        <pre id="texto"></pre>
+        <pre id="consola"></pre>
+                <!-- Boto ejecucion -->
+    <button type="button" id="execute" class="btn btn-success">Ejecutar</button>
+    </div>
+    <!-- libreria para el codigo -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='ace.js') }}" type="text/javascript" charset="utf-8"></script>
+    <script>
+    // Editor
+        var codeEditor = ace.edit("texto");
+        codeEditor.setTheme("ace/theme/dracula");
+        codeEditor.session.setMode("ace/mode/julia");
+        codeEditor.setShowPrintMargin(true);
+        document.getElementById('texto').style.fontSize='13px';
+    //Consola
+        var output = ace.edit("consola");
+        output.setTheme("ace/theme/dracula");
+        output.session.setMode("ace/mode/text");
+        output.setReadOnly(true);
+        output.setShowPrintMargin(true);
+        output.renderer.setShowGutter(false);
+        document.getElementById('consola').style.fontSize='13px';
+       // envio de la entrada
+        $(function(){
+            //boton ejecutar
+            $('button#execute').on('click', function(e) {
+                // 
+                var code = codeEditor.getValue();
+                e.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: '/execute',
+                    data: JSON.stringify({ input: code }),
+                    success: function(data){
+                        console.log(data.msg)
+                        res = JSON.parse(data.msg);
+                        output.setValue(res.salida);
+                    },
+                    contentType: 'application/json',
+                    dataType: 'json'
+                });
+            });
+            // Peticion de la salida
+            // Consola scdript
+            $('a#getTree').on('click', function(e) {
+                var code = codeEditor.getValue();
+                console.log(code);
+                e.preventDefault();
+                $.ajax({
+                    type: 'GET',
+                    url: '/getTree',
+                    success: function(data){
+                        console.log(data);
+                        output.setValue(data.msg);
+                    },
+                    contentType: 'application/json',
+                    dataType: 'json'
+                });
+            });
+        })
+    </script>
+
+</body>
+
+{% endblock%}

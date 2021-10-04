@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>JOLC - 201709075</title>
+         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    </head>
+<body >
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark" >
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                       <button type="button" id="btnSimbolos" class="btn btn-success">Tabla de simbolos</button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" id="btnErrores" class="btn btn-success">Errores</button>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <button type="button" id="btnAST" class="btn btn-success">AST</button>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/analisis">Ejecucion</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/reportes">Reportes</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <br/><br/><br/>
+<div style="padding: 50px; display: none;" id="Simbolos">
+<h2>Tabla de Simbolos<h2>
+</div>
+<div style="padding: 50px; display: none;" id="Errores">
+<h2>Tabla de Errores<h2>
+</div>
+<div style="padding: 50px; display: none;" id="ASTR">
+<h2>AST<h2>
+</div>
+    <div style="padding: 50px; display: none;" id="tablaErrores">
+        <table class="table" style="color: black;">
+            <thead class="thead-dark">
+                <!-- Tabla Errores -->
+            <tr>
+                <th scope="col">Descripción</th>
+                <th scope="col">Línea</th>
+                <th scope="col">Columna</th>
+                <th scope="col">Fecha</th>
+            </tr>
+            </thead>
+            <tbody id="bodyErrores"></tbody>
+        </table>
+    </div>
+    <div style="padding: 50px; display: none;" id="tablaSimbolos">
+        <table class="table" style="color: black;">
+            <thead class="thead-dark">
+                <!-- Tabla simbolos -->
+            <tr>
+                <th scope="col">Nombre</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Fila</th>
+                <th scope="col">Columna</th>
+            </tr>
+            </thead>
+            <tbody id="bodySimbolos"></tbody>
+        </table>
+    </div>
+    <br><br>
+    <div class="imgDiv" style="display: none;" id="imgAST">
+        <img src="{{ url_for('static', filename='ASTDOT.gv.png') }}">
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>
+        dataRes = null;
+// res con la tabla de Erroes
+        $(function(){
+            $('button#btnErrores').on('click', function(e) { 
+                $.ajax({
+                    type: 'GET',
+                    url: '/getDataRes',
+                    success: function(data) {
+                        res = JSON.parse(data.msg);
+                        console.log(res);
+                        errores = JSON.parse(res.tablaErrores);
+                        
+                        htmlFilas = "";
+                        for (error of errores) {
+                            htmlFilas += `<tr><th>${error.Mensaje}</th><td>${error.Fila}</td><td>${error.Columna}</td><td>${error.Fecha}</td></tr>`
+                        } 
+
+                        $("#tablaErrores").show();
+                        $("#tablaSimbolos").hide();
+                        $("#imgAST").hide();
+                        $("#Errores").show();
+                        $("#Simbolos").hide();
+                        $("#ASTR").hide();   
+                        bodyErrores = document.getElementById("bodyErrores");
+                        bodyErrores.innerHTML = htmlFilas;
+
+                        console.log(errores);
+                    },
+                    contentType: 'application/json',
+                    dataType: 'json'
+                });
+            });
+// res tabla de simbolos
+            $('button#btnSimbolos').on('click', function(e) { 
+                $.ajax({
+                    type: 'GET',
+                    url: '/getDataRes',
+                    success: function(data) {
+                        res = JSON.parse(data.msg);
+                        simbolos = res.tablaSimbolos;
+                        
+                        htmlFilas = "";
+                        for (simbolo of simbolos) {
+                            htmlFilas += `<tr><th>${simbolo.ID}</th><td>${simbolo.Tipo}</td><td>${simbolo.Fila}</td><td>${simbolo.Columna}</td></tr>`
+                        } 
+
+                        $("#tablaSimbolos").show();
+                        $("#tablaErrores").hide();
+                        $("#imgAST").hide();
+                        $("#Errores").hide();
+                        $("#Simbolos").show();
+                        $("#ASTR").hide(); 
+                        bodySimbolos = document.getElementById("bodySimbolos");
+                        bodySimbolos.innerHTML = htmlFilas;
+
+                        console.log(simbolos);
+                    },
+                    contentType: 'application/json',
+                    dataType: 'json'
+                });
+            });
+
+            $('button#btnAST').on('click', function(e) { 
+                $("#tablaSimbolos").hide();
+                $("#tablaErrores").hide();
+                $("#imgAST").show();
+                $("#Errores").hide();
+                        $("#Simbolos").hide();
+                        $("#ASTR").show(); 
+            });
+        })
+    </script>
+   
+</body>
+</html>
